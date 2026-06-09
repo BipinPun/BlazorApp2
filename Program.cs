@@ -1,9 +1,12 @@
 using BlazorApp2.Components;
 using BlazorApp2.Components.Account;
 using BlazorApp2.Data;
+using BlazorApp2.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ModuleReview.Services;
+using BlazorApp2.Services;
 
 namespace BlazorApp2
 {
@@ -29,8 +32,7 @@ namespace BlazorApp2
                 .AddIdentityCookies();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            //builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddControllers();// Add API controllers for the Inventory management
             builder.Services.AddIdentityCore<ApplicationUser>(options =>
@@ -41,9 +43,12 @@ namespace BlazorApp2
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
-
+            builder.Services.AddScoped<ModuleService>();
+            builder.Services.AddScoped<ProgrammeService>();
+            builder.Services.AddScoped<StaffService>();
+            builder.Services.AddHttpClient();
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
+            builder .Services.AddDbContextFactory<ApplicationDbContext>((DbContextOptionsBuilder options) => options.UseSqlServer(connectionString));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

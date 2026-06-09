@@ -1,0 +1,97 @@
+﻿@page "/staff/{Id:int}"
+@rendermode InteractiveServer
+@using BlazorApp2.Data.Models
+@using BlazorApp2.Services
+@inject StaffService staffService
+@inject ProgrammeService programmeService
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Staff Member Details</h3>
+
+<EditForm Model="@record">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label font-weight-bold">Title</label>
+            <InputText class="form-control" @bind-Value="record.Title" disabled />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label font-weight-bold">Forename</label>
+            <InputText class="form-control" @bind-Value="record.Forename" disabled />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label font-weight-bold">Surname</label>
+            <InputText class="form-control" @bind-Value="record.Surname" disabled />
+        </div>
+    </div>
+</EditForm>
+<hr />
+
+<h3>Programmes Leaderships</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Code</th>
+            <th>Title</th>
+            <th>Credits</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var programme in programmes)
+        {
+            <tr>
+                <td>@programme.Id</td>
+                <td>@programme.Code</td>
+                <td>@programme.Title</td>
+                <td>@programme.Credits</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => GoToDetailsPage(programme.Id)">View</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    Staff record = new Staff();
+    List<Programme> programmes = new List<Programme>();
+    public string Title = "";
+
+    // Step 12: Initialization lifecycle method
+    protected async override Task OnInitializedAsync()
+    {
+        record = new Staff();
+
+        if (Id != 0)
+        {
+            Title = "View";
+            record = staffService.GetById(Id);
+            ApplyFilter();
+        }
+        else
+        {
+            HandleDirectAdd();
+        }
+    }
+
+    // Fetches the related programs using the custom service method from Step 9
+    void ApplyFilter()
+    {
+        programmes = programmeService.GetListByProgrammeLeaderId(Id);
+    }
+
+    void HandleDirectAdd()
+    {
+        Title = "Add";
+    }
+
+    void GoToDetailsPage(int programmeId)
+    {
+        NavigationManager.NavigateTo("/programme/" + programmeId);
+    }
+}
